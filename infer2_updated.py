@@ -36,8 +36,8 @@ def convertTuple(tup):
     str =  '_'.join(tup)
     return str
 
-attendance_images = glob.glob('/home/saad/saad/arcface/insightface/recognition/arcface_torch/data/aligned_faces/*')
-register_images = glob.glob('/home/saad/saad/arcface/traning_dataset/gadoon office/test2/register/*')
+attendance_images = glob.glob('/home/saad/saad/arcface/openvideo_detection/FR_OV_Testing/aligned_dataset/openvino_aligned_Attendance/*')
+register_images = glob.glob('/home/saad/saad/arcface/openvideo_detection/FR_OV_Testing/aligned_dataset/openvino_aligned_registration/*')
 
 full_path1 = []
 name_list1 = []
@@ -69,6 +69,8 @@ attendance_embeddings = []
 # elem[0] = number
 # elem[1] = path
 
+print("Calculating Attendance Embeddings")
+
 for elem in enumerate(full_path1):
 
     open_cv_image = cv2.imread(elem[1])
@@ -87,6 +89,7 @@ for elem in enumerate(full_path1):
     attendance_names.append(name_list1[elem[0]])
     print(elem[0])
 
+print("Calculating Register Embeddings")
 
 for elem in enumerate(full_path2):
 
