@@ -17,12 +17,14 @@ def convertTuple(tup):
     str =  '_'.join(tup)
     return str
 
-
-network='r18'
+file_name = "Recognitions_arcface100"
+network='r100'
 # model = "ms1mv3_arcface_r50_fp16"
 # model = "ms1mv3_arcface_r18_fp16"
+model = "ms1mv3_arcface_r100_fp16"
 # model = "glint360k_cosface_r50_fp16_0.1"
-model = "glint360k_cosface_r18_fp16_0.1"
+# model = "glint360k_cosface_r18_fp16_0.1"
+# model = "glint360k_cosface_r100_fp16_0.1"
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 weights='../weights/'+model+'/backbone.pth'
@@ -31,7 +33,7 @@ resnet.load_state_dict(torch.load(weights, map_location=device))
 resnet.eval().to(device)
 print(device)
 
-f = open("Recognitions.txt", "a")
+f = open(file_name+".txt", "a")
 f.write("Model: "+model)
 f.close()
 
@@ -46,7 +48,7 @@ print("Registered images")
 embeddings = []
 names = [] 
 
-directory = '/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/register_aligned_cosface18/'
+directory = '/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/new_registered_arcface100/'
 for entry in os.scandir(directory):
     folder_flag = os.path.isdir(entry)
     if (folder_flag):
@@ -92,6 +94,7 @@ for p in attendance_images:
 
 attendance_names = []
 attendance_embeddings = []
+attendance_paths = []
 
 print("Attendance images")
 
@@ -106,6 +109,7 @@ for elem in enumerate(full_path1):
     x_aligned = img
     embedding = resnet(x_aligned.to(device)) 
     attendance_embeddings.append(embedding.detach().cpu().numpy())
+    attendance_paths.append(elem[1])
     # attendance_embeddings = np.vstack(attendance_embeddings)
     attendance_names.append(name_list1[elem[0]])
     print(elem[0])
@@ -141,19 +145,22 @@ for index1, e1 in enumerate(attendance_embeddings):
         
         print("\nOrignal Name: "+attendance_names[index1])
         print("Predicted Name: "+names[index4])
+        print("Path: "+attendance_paths[index1])
         print("Score: "+str(min_dist))
            
-        f = open("Recognitions.txt", "a")
-        f.write("\n\nOrignal Name: "+attendance_names[index1])
+        f = open(file_name+".txt", "a")
+        f.write("\n\nPath: "+attendance_paths[index1])
+        f.write("\nOrignal Name: "+attendance_names[index1])
         f.write("\nPredicted Name: "+names[index4])
         f.write("\nScore: "+str(min_dist))
         f.close()
+        cv2.imwrite("/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/miss_pics/OrignalName_"+attendance_names[index1]+"_PredictedName_"+names[index4]+"_"+str(not_same_count)+".png",cv2.imread(attendance_paths[index1]))
 
 
 print("\n\ntotal correct recognize: "+str(same_count))
 print("\ntotal incorrect recognize: "+str(not_same_count))
 
-f = open("Recognitions.txt", "a")
+f = open(file_name+".txt", "a")
 f.write("\n\nModel: "+model)
 f.write("\n\ntotal correct recognize: "+str(same_count))
 f.write("\ntotal incorrect recognize: "+str(not_same_count))
