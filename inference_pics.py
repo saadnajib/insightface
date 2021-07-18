@@ -59,10 +59,10 @@ for entry in os.scandir(directory):
                 embedding_file_name = emb.path.split('/')[-1]
                 embedding = np.load(embedding_file_path)
                 embeddings.append(embedding)
-                names.append(name)
-                names.append(name)
-                names.append(name)
-                names.append(name)
+                number_of_emb = embedding.shape[0]
+                for i in range(number_of_emb):
+                    names.append(name)
+                    
                 print(name)
     else:
         print("No Folders avaliable")

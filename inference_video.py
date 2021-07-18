@@ -1,3 +1,4 @@
+from torch.types import Number
 from backbones import get_model
 import torch.utils.data
 import torch
@@ -179,7 +180,7 @@ print("Registered images")
 reg_embeddings = []
 names = [] 
 
-directory = '/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/all_new_registered_new_cosface100/'
+directory = '/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/new/new_registered_cosface100/'
 for entry in os.scandir(directory):
     folder_flag = os.path.isdir(entry)
     if (folder_flag):
@@ -190,10 +191,10 @@ for entry in os.scandir(directory):
                 embedding_file_name = emb.path.split('/')[-1]
                 embedding = np.load(embedding_file_path)
                 reg_embeddings.append(embedding)
-                names.append(name)
-                names.append(name)
-                names.append(name)
-                names.append(name)
+                number_of_emb = embedding.shape[0]
+                print(number_of_emb)
+                for i in range(number_of_emb):
+                    names.append(name)
                 print(name)
     else:
         print("No Folders avaliable")
