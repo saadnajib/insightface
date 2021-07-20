@@ -22,6 +22,7 @@ from FaceDetection.post_processing_utils import decode
 from FaceDetection.post_processing_utils import decode_landm
 from FaceDetection.config_rfb import cfg_rfb
 import FaceAlignment.face_alignment as face_alignment
+from sklearn.preprocessing import Normalizer
 
 
 
@@ -33,6 +34,8 @@ CONF_THRESHOLD = 0.02
 TOP_K = 1000
 NMS_THRESHOLD = 0.4
 VIEW_THRESHOLD = 0.9
+save_attendance = True
+save_attendance_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/save_attendance"
 
 ##################################################################################################
 
@@ -121,12 +124,26 @@ def align_faces(dets, img):
 
     aligned_faces = []  #np.array([], dtype=object)
 
-    # Showing output on the image
     for b in dets:
         if b[4] < VIEW_THRESHOLD:
             continue
-
+        # text = "{:.4f}".format(b[4])
         b = list(map(int, b))
+        # cv2.rectangle(img, (b[0], b[1]),
+        #                 (b[2], b[3]), (0, 0, 255), 2)
+
+        # cx = b[0]
+        # cy = b[1] + 12
+        # cv2.putText(img, text, (cx, cy),
+        #             cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255))
+
+        # landms
+        # cv2.circle(img, (b[5], b[6]), 1, (0, 0, 255), 4)
+        # cv2.circle(img, (b[7], b[8]), 1, (0, 255, 255), 4)
+        # cv2.circle(img, (b[9], b[10]), 1, (255, 0, 255), 4)
+        # cv2.circle(img, (b[11], b[12]), 1, (0, 255, 0), 4)
+        # cv2.circle(img, (b[13], b[14]), 1, (255, 0, 0), 4)
+
 
         roi = face_alignment.ROI(b)
 
@@ -140,7 +157,7 @@ def align_faces(dets, img):
         orig_face = face[0][0].transpose(1,2,0)
 
         # cv2.imshow(" ",orig_face)
-        # cv2.waitKey(0)
+        # cv2.waitKey(1)
         
         aligned_faces.append(orig_face)
 
@@ -180,7 +197,8 @@ print("Registered images")
 reg_embeddings = []
 names = [] 
 
-directory = '/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/new/new_registered_cosface100/'
+# directory = '/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/folders_cosface100/'
+directory = '/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/folders_cosface100_l2/'
 for entry in os.scandir(directory):
     folder_flag = os.path.isdir(entry)
     if (folder_flag):
@@ -192,7 +210,6 @@ for entry in os.scandir(directory):
                 embedding = np.load(embedding_file_path)
                 reg_embeddings.append(embedding)
                 number_of_emb = embedding.shape[0]
-                print(number_of_emb)
                 for i in range(number_of_emb):
                     names.append(name)
                 print(name)
@@ -206,19 +223,19 @@ for entry in os.scandir(directory):
 
 # Loading Video
 
-video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/saad2.mp4"
-save_video = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/output3.avi"
+video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/test1.mp4"
+save_video = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/cosface100_l2_1-throshold.avi"
 
 
 # inital camera
 fourcc = cv2.VideoWriter_fourcc(*'MJPG')
 cap = cv2.VideoCapture(video_path)
 cap.set(3,500)
-cap.set(4,500)   
+cap.set(4,500)  
 _, frame = cap.read()
 
-frame = resize_image(frame, 0.5)
-out = cv2.VideoWriter(save_video,cv2.VideoWriter_fourcc(*'MJPG'), 20.0, (frame.shape[1], frame.shape[0]), isColor=True)
+frame1 = resize_image(frame, 0.5)
+out = cv2.VideoWriter(save_video,cv2.VideoWriter_fourcc(*'MJPG'), 20.0, (frame1.shape[1], frame1.shape[0]), isColor=True)
 total_frames_passed = 0
 
 
@@ -239,7 +256,7 @@ while cap.isOpened():
             
             # image = Image.fromarray(frame[...,::-1]) #bgr to rgb
             start_time = time.time()
-            frame = resize_image(frame, 0.5)
+            # frame = resize_image(frame, 0.5)
 
             dets = get_detections(frame, net)
             aligned_faces = align_faces(dets, frame)
@@ -252,7 +269,6 @@ while cap.isOpened():
                 img = 255*face
                 # cv2.imshow('img', img)
                 # cv2.waitKey(1)
-
                 img = cv2.resize(img, (112,112))
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img = np.transpose(img, (2, 0, 1))
@@ -260,7 +276,12 @@ while cap.isOpened():
                 img.div_(255).sub_(0.5).div_(0.5)
                 x_aligned = img
                 attendance_embedding = resnet(x_aligned.to(device))
-                attendance_embedding = attendance_embedding.detach().cpu().numpy()
+
+                in_encoder = Normalizer(norm='l2')
+                attendance_embedding = in_encoder.transform(attendance_embedding.detach().cpu().numpy())
+                attendance_embedding = attendance_embedding
+
+                # attendance_embedding = attendance_embedding.detach().cpu().numpy()
 
                 distance = []
 
@@ -271,7 +292,7 @@ while cap.isOpened():
                 min_dist = min(distance)
                 index4 = distance.index(min_dist)
 
-                if min_dist <= 27:
+                if min_dist <= 1.0:
                     Predicted_name = names[index4]
                     
                 else:
@@ -280,6 +301,7 @@ while cap.isOpened():
                 
                 print(Predicted_name)
                 print("score: ",min_dist)
+                print("\n")
 
                 #################################### printing bounding boxes and landmarks on frame #################################### 
                 for b in dets:
@@ -291,15 +313,17 @@ while cap.isOpened():
                     
                     cx = b[0]
                     cy = b[1] + 12
+                    cy1 = b[1] - 12
 
                     cv2.putText(frame, Predicted_name, (cx, cy),
-                                cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255))
+                                cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 255, 255),1)
+
                     # landms
-                    cv2.circle(frame, (b[5], b[6]), 5, (0, 0, 255), -1)
-                    cv2.circle(frame, (b[7], b[8]), 5, (0, 255, 255), -1)
-                    cv2.circle(frame, (b[9], b[10]), 5, (255, 0, 255), -1)
-                    cv2.circle(frame, (b[11], b[12]), 5, (0, 255, 0), -1)
-                    cv2.circle(frame, (b[13], b[14]), 5, (255, 0, 0), -1)
+                    cv2.circle(frame, (b[5], b[6]), 4, (0, 0, 255), -1)
+                    cv2.circle(frame, (b[7], b[8]), 4, (0, 255, 255), -1)
+                    cv2.circle(frame, (b[9], b[10]), 4, (255, 0, 255), -1)
+                    cv2.circle(frame, (b[11], b[12]), 4, (0, 255, 0), -1)
+                    cv2.circle(frame, (b[13], b[14]), 4, (255, 0, 0), -1)
 
 
                 FPS = 1.0 / (time.time() - start_time)
@@ -311,12 +335,17 @@ while cap.isOpened():
                         (255,0,0),
                         2,
                         cv2.LINE_AA)
+
+                if Predicted_name != "unknown" and save_attendance == True:
+                    cv2.imwrite(save_attendance_path+"/"+Predicted_name+"_score_"+str(min_dist)+".jpg",frame)
          
         except:
             continue
-
-        out.write(frame) 
-        cv2.imshow('video', frame)
+        
+        frame1 = resize_image(frame, 0.5) 
+        out.write(frame1)
+        # frame1 = resize_image(frame, 0.75) 
+        cv2.imshow('video', frame1)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break  
 
