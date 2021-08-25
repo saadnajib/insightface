@@ -37,7 +37,7 @@ TOP_K = 1000
 NMS_THRESHOLD = 0.4
 VIEW_THRESHOLD = 0.9
 save_attendance = True
-save_attendance_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/save_attendance/new_saving_faces_cosface50_2video"
+save_attendance_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/save_attendance/new_saving_faces_cosface50_testvideo_again"
 
 file_name = "Recognitions_cosface100_saad"
 network='r50'
@@ -55,8 +55,8 @@ generate_embedding = False
 # reg_embedding_dataset_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/agligned_registration/aligned_faces_folders_cosface50_newtrainedmodel"
 reg_embedding_dataset_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/agligned_registration/aligned_faces_folders_cosface50"
 
-# input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/videos/1.mp4"
-input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/test3.mp4"
+# input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/videos/3.mp4"
+input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/test4.mp4"
 save_video_flag = False
 save_video = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/cosface50_1-th_trainedmodel.avi"
 landmark_flag = True
@@ -364,7 +364,6 @@ while cap.isOpened():
                 else:
                     Predicted_name = "unknown"
                     
-                
                 print(Predicted_name)
                 print("score: ",min_dist)
                 print("\n")
@@ -386,13 +385,12 @@ while cap.isOpened():
 
                 #################################### printing bounding boxes  #################################### 
                 
-                if save_attendance == True:    
-                    frame_face_crop = plain_frame[bb[i][0][1]-70:bb[i][1][1]+70, bb[i][0][0]-70:bb[i][1][0]+70] 
+                if save_attendance == True:
+                    plain_frame = cv2.copyMakeBorder(plain_frame, 70, 70, 70, 70, cv2.BORDER_CONSTANT)    
+                    frame_face_crop = plain_frame[(bb[i][0][1]-70)+70:(bb[i][1][1]+70)+70, (bb[i][0][0]-70)+70:(bb[i][1][0]+70)+70]
 
                 if bounding_box_flag == True:
                     cv2.rectangle(frame, bb[i][0],bb[i][1], (0, 0, 255), 2)
-
-                # cv2.imshow("",frame_face_crop)
                 
                 # bb[0][0][0] = b[0]
                 # bb[0][0][1] = b[1]
@@ -405,8 +403,6 @@ while cap.isOpened():
 
                 cv2.putText(frame, Predicted_name, (cx, cy),cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 255, 255),1)
 
-                
-############################################
 
                 FPS = 1.0 / (time.time() - start_time)
 
@@ -418,12 +414,20 @@ while cap.isOpened():
                         2,
                         cv2.LINE_AA)
 
+                #################################### saving attendance ####################################
+
+
                 if Predicted_name != "unknown" and save_attendance == True:
                     
                     name_list = []
                     flag_solo = False
 
-                    # put any random image in solo folder to make this part of the code work
+                    if not os.path.exists(save_attendance_path+'/solo'):
+                        os.makedirs(save_attendance_path+'/solo')
+                        img = np.zeros((512, 512, 1), dtype = "uint8")
+                        cv2.imwrite(save_attendance_path+"/solo/random_image_12345.jpg",img)
+                        
+
 
                     photos = glob.glob(save_attendance_path+'/solo/*')
                     #str3 = Ghulam_Mustafa_77796
@@ -442,6 +446,10 @@ while cap.isOpened():
     
                     if flag_solo == True:
                         cv2.imwrite(save_attendance_path+"/solo/"+Predicted_name+"_score_"+str(min_dist)+".jpg",frame_face_crop)
+                        f = open(save_attendance_path+"/solo/recognition.txt","a")
+                        f.write("predicted name: "+Predicted_name)
+                        f.close
+
                     cv2.imwrite(save_attendance_path+"/"+Predicted_name+"_score_"+str(min_dist)+".jpg",frame_face_crop)
          
         except:
@@ -462,7 +470,3 @@ if save_video_flag == True:
     out.release()
 
 cv2.destroyAllWindows()
-
-
-
-
