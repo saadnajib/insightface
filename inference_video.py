@@ -56,7 +56,7 @@ generate_embedding = False
 reg_embedding_dataset_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/agligned_registration/aligned_faces_folders_cosface50"
 
 # input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/videos/3.mp4"
-input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/test4.mp4"
+input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/test1.mp4"
 save_video_flag = False
 save_video = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/cosface50_1-th_trainedmodel.avi"
 landmark_flag = True
@@ -446,8 +446,8 @@ while cap.isOpened():
     
                     if flag_solo == True:
                         cv2.imwrite(save_attendance_path+"/solo/"+Predicted_name+"_score_"+str(min_dist)+".jpg",frame_face_crop)
-                        f = open(save_attendance_path+"/solo/recognition.txt","a")
-                        f.write("predicted name: "+Predicted_name)
+                        f = open(save_attendance_path+"/solo/recognitions.txt","a")
+                        f.write("\nPredicted name: "+Predicted_name)
                         f.close
 
                     cv2.imwrite(save_attendance_path+"/"+Predicted_name+"_score_"+str(min_dist)+".jpg",frame_face_crop)
@@ -470,3 +470,7 @@ if save_video_flag == True:
     out.release()
 
 cv2.destroyAllWindows()
+
+
+
+
