@@ -37,7 +37,8 @@ TOP_K = 1000
 NMS_THRESHOLD = 0.4
 VIEW_THRESHOLD = 0.9
 save_attendance = True
-save_attendance_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/save_attendance/new_saving_faces_cosface50_testvideo_again"
+save_attendance_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/save_attendance/new_saving_faces_cosface50_6video"
+# save_attendance_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/save_attendance/new_saving_faces_cosface50_2video_again"
 
 file_name = "Recognitions_cosface100_saad"
 network='r50'
@@ -55,11 +56,12 @@ generate_embedding = False
 # reg_embedding_dataset_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/agligned_registration/aligned_faces_folders_cosface50_newtrainedmodel"
 reg_embedding_dataset_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/agligned_registration/aligned_faces_folders_cosface50"
 
-# input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/videos/3.mp4"
-input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/test1.mp4"
+input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/gadoon_factory/videos/6.mp4"
+# input_video_path = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/input_video/test1.mp4"
+# input_video_path = "/home/saad/Videos/test_video3/7.mp4"
 save_video_flag = False
 save_video = "/home/saad/saad/arcface/insightface/recognition/arcface_torch/aligned_embeddings_omair_shared/saved_video/cosface50_1-th_trainedmodel.avi"
-landmark_flag = True
+landmark_flag = False
 bounding_box_flag = True
 
 ##################################################################################################
@@ -448,7 +450,7 @@ while cap.isOpened():
                         cv2.imwrite(save_attendance_path+"/solo/"+Predicted_name+"_score_"+str(min_dist)+".jpg",frame_face_crop)
                         f = open(save_attendance_path+"/solo/recognitions.txt","a")
                         f.write("\nPredicted name: "+Predicted_name)
-                        f.close
+                        f.close()
 
                     cv2.imwrite(save_attendance_path+"/"+Predicted_name+"_score_"+str(min_dist)+".jpg",frame_face_crop)
          
@@ -462,7 +464,10 @@ while cap.isOpened():
         frame2 = resize_image(frame, 0.5) 
         cv2.imshow('video', frame2)
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            break  
+            break
+    else:
+        os.remove(save_attendance_path+"/solo/random_image_12345.jpg")
+        break  
 
 cap.release()
 
